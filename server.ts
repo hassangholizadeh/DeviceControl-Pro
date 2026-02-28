@@ -3,6 +3,7 @@ import { createServer as createViteServer } from 'vite';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import crypto from 'crypto';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,9 +15,31 @@ if (!fs.existsSync(path.dirname(DATA_FILE))) {
   fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
 }
 
-// Initialize db.json if it doesn't exist
-if (!fs.existsSync(DATA_FILE)) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify({
+const hashPassword = (password: string) => {
+  return crypto.createHash('sha256').update(password).digest('hex');
+};
+
+const defaultAdminUser = {
+  id: 1,
+  username: 'admin',
+  password: hashPassword('admin'),
+  registerSystem: 'edit',
+  registerPrinter: 'edit',
+  listSystem: 'edit',
+  listPrinter: 'edit',
+  repairPrinter: true,
+  repairSystem: true,
+  repairPrinterList: true,
+  repairSystemList: true,
+  inventory: true,
+  reports: true,
+  dashboard: true,
+  import: true,
+  created: new Date().toLocaleDateString('fa-IR')
+};
+
+const initializeData = () => {
+  let data: any = {
     systems: [],
     printers: [],
     users: [],
@@ -26,8 +49,30 @@ if (!fs.existsSync(DATA_FILE)) {
     auditLogs: [],
     lifecycleEvents: [],
     definitions: {}
-  }, null, 2));
-}
+  };
+
+  if (fs.existsSync(DATA_FILE)) {
+    try {
+      const fileContent = fs.readFileSync(DATA_FILE, 'utf-8');
+      data = JSON.parse(fileContent);
+    } catch (error) {
+      console.error('Error reading existing data file, initializing new one:', error);
+    }
+  }
+
+  // Ensure default admin user exists if users array is empty
+  if (!data.users || data.users.length === 0) {
+    data.users = [defaultAdminUser];
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+    console.log('Initialized db.json with default admin user.');
+  } else if (!fs.existsSync(DATA_FILE)) {
+     // If file didn't exist but we somehow have data (unlikely unless logic changes), write it
+     fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+  }
+};
+
+// Initialize on startup
+initializeData();
 
 async function startServer() {
   const app = express();
@@ -46,7 +91,8 @@ async function startServer() {
         const data = fs.readFileSync(DATA_FILE, 'utf-8');
         res.json(JSON.parse(data));
       } else {
-        res.json({});
+        // Should not happen due to initialization, but safe fallback
+        res.json({ users: [defaultAdminUser] });
       }
     } catch (error) {
       console.error('Error reading data:', error);

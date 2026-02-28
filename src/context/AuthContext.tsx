@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
+import { useData } from './DataContext';
 import CryptoJS from 'crypto-js';
 
 interface AuthContextType {
@@ -12,6 +13,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { users } = useData();
   const [user, setUser] = useState<User | null>(() => {
     const saved = localStorage.getItem('currentUser');
     return saved ? JSON.parse(saved) : null;
@@ -22,7 +24,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const login = (username: string, password: string) => {
-    const users: User[] = JSON.parse(localStorage.getItem('tblUsers') || '[]');
     const foundUser = users.find(u => u.username === username);
     
     if (foundUser && foundUser.password === hashPassword(password)) {

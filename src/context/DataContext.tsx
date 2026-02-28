@@ -48,6 +48,7 @@ interface DataContextType {
   deleteRepair: (id: number) => void;
   addLifecycleEvent: (event: LifecycleEvent) => void;
   addAuditLog: (log: Omit<AuditLog, 'id' | 'timestamp'>) => void;
+  isLoading: boolean;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -784,7 +785,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       addRepair, updateRepair, deleteRepair,
       addLifecycleEvent,
       addAuditLog,
-      updateDefinitions
+      updateDefinitions,
+      isLoading
     }}>
       {children}
     </DataContext.Provider>

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useData } from '../context/DataContext';
 import { useTheme } from '../context/ThemeContext';
-import { ShieldAlert, Sun, Moon, Eye, EyeOff } from 'lucide-react';
+import { ShieldAlert, Sun, Moon, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { motion, useMotionValue, useTransform, useSpring } from 'motion/react';
 
 export const Login = () => {
@@ -11,6 +12,7 @@ export const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const { login } = useAuth();
+  const { isLoading } = useData();
   const { theme, setTheme } = useTheme();
 
   // Tilt Effect
@@ -164,10 +166,20 @@ export const Login = () => {
 
           <button
             type="submit"
-            className="w-full py-4 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-bold text-lg shadow-lg shadow-indigo-500/30 transition-all active:scale-[0.98] group flex items-center justify-center gap-2"
+            disabled={isLoading}
+            className="w-full py-4 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-bold text-lg shadow-lg shadow-indigo-500/30 transition-all active:scale-[0.98] group flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            ورود به سیستم
-            <span className="transform group-hover:-translate-x-1 transition-transform">&larr;</span>
+            {isLoading ? (
+              <>
+                <Loader2 className="w-6 h-6 animate-spin" />
+                در حال بارگذاری...
+              </>
+            ) : (
+              <>
+                ورود به سیستم
+                <span className="transform group-hover:-translate-x-1 transition-transform">&larr;</span>
+              </>
+            )}
           </button>
         </form>
 

@@ -74,14 +74,14 @@ const AppRoutes = () => {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <ToastProvider>
-        <DataProvider>
+    <ToastProvider>
+      <DataProvider>
+        <AuthProvider>
           <BrowserRouter>
             <AppRoutes />
           </BrowserRouter>
-        </DataProvider>
-      </ToastProvider>
-    </AuthProvider>
+        </AuthProvider>
+      </DataProvider>
+    </ToastProvider>
   );
 }
